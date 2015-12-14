@@ -19,7 +19,7 @@ colorbg = Color.rgb 192 192 192
 colorLine = Color.rgb 0 0 0
 size = 70
 
-type GameState = Play | Pause
+type GameState = Play | Pause | End
 type Dir = Up | Down | Left | Right
 
 type alias Moji =
@@ -113,37 +113,42 @@ update {space, dir, iseed, delta} ({state, mojis, level, count, addT, seed} as g
     seedt =
       if state == Pause then iseed else seed
     newState = 
-      if space then
+      if space && state == Pause then
         Play
-      else if List.any isPass mojis then
+      else if space && state == End then
         Pause
+      else if List.any isPass mojis then
+        End
       else
         state
     (newCount, dropedMojis) =
-      if state == Pause then
-        (count, mojis)
-      else
+      if state == Play then
         dropMojis dir count mojis
+      else
+        (count, mojis)
     (newSeed, newAddT, addedMojis) =
-      if state == Pause then
-        (seedt, addT, dropedMojis)
-      else
+      if state == Play then
         addMojis seedt dt tm dropedMojis
-    newMojis =
-      if state == Pause then
-        addedMojis
       else
+        (seedt, addT, dropedMojis)
+    newMojis =
+      if state == Play then
         updateMojis delta dt addedMojis
+      else
+        addedMojis
     newLevel = round <| (toFloat count) / 30 + 1
   in
-    { game |
-        state = newState,
-        mojis = newMojis,
-        level = newLevel,
-        count = newCount,
-        addT = newAddT,
-        seed = newSeed
-    }
+    if newState == Pause then
+      initialGame
+    else
+      { game |
+          state = newState,
+          mojis = newMojis,
+          level = newLevel,
+          count = newCount,
+          addT = newAddT,
+          seed = newSeed
+      }
 
 -- TODO: remove case nest
 dropMojis : {x : Int, y : Int} -> Int -> List Moji -> (Int, List Moji)
