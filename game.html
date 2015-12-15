@@ -7077,31 +7077,43 @@ Elm.Main.make = function (_elm) {
    $Time = Elm.Time.make(_elm);
    var _op = {};
    var delta = A2($Signal.map,$Time.inMilliseconds,$Time.fps(30));
-   var viewMoji = function (_p0) {
-      var _p1 = _p0;
+   var arrowsPulse = function () {
+      var upd = F2(function (_p1,_p0) {
+         var _p2 = _p1;
+         var _p5 = _p2;
+         var _p3 = _p0;
+         var _p4 = _p3;
+         return _U.eq(_p4.x,_p5.x) && _U.eq(_p4.y,_p5.y) ? A2($Debug.log,"false",{c: false,x: _p5.x,y: _p5.y}) : A2($Debug.log,
+         "true",
+         {c: true,x: _p5.x,y: _p5.y});
+      });
+      return A3($Signal.foldp,upd,{c: false,x: 0,y: 0},A2($Signal.sampleOn,delta,$Keyboard.arrows));
+   }();
+   var viewMoji = function (_p6) {
+      var _p7 = _p6;
       return A2($Graphics$Collage.scale,
       4,
-      A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: _p1.x,_1: _p1.y},$Graphics$Collage.text(A2($Text.color,_p1.scolor,$Text.fromString(_p1.$char)))));
+      A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: _p7.x,_1: _p7.y},$Graphics$Collage.text(A2($Text.color,_p7.scolor,$Text.fromString(_p7.$char)))));
    };
    var calcPassTime = function (lv) {    return 4.0 / $Basics.toFloat(lv) * 1000 + 1000;};
    var updateMojis = F3(function (delta,dt,mojis) {    return A2($List.map,function (m) {    return _U.update(m,{y: m.y - dt * delta});},mojis);});
    var getDirChar = function (d) {
-      var _p2 = d;
-      switch (_p2.ctor)
+      var _p8 = d;
+      switch (_p8.ctor)
       {case "Up": return "上";
          case "Down": return "下";
          case "Left": return "左";
          default: return "右";}
    };
    var initialSeed = A2($Signal.map,
-   function (_p3) {
-      var _p4 = _p3;
-      return $Random.initialSeed($Basics.round(_p4._0));
+   function (_p9) {
+      var _p10 = _p9;
+      return $Random.initialSeed($Basics.round(_p10._0));
    },
    $Time.timestamp($Signal.constant({ctor: "_Tuple0"})));
    var Input = F4(function (a,b,c,d) {    return {space: a,dir: b,iseed: c,delta: d};});
    var input = A2($Signal.sampleOn,delta,A5($Signal.map4,Input,$Keyboard.space,$Keyboard.arrows,initialSeed,delta));
-   var Game = F6(function (a,b,c,d,e,f) {    return {state: a,mojis: b,level: c,count: d,addT: e,seed: f};});
+   var Game = F7(function (a,b,c,d,e,f,g) {    return {state: a,prvDir: b,mojis: c,level: d,count: e,addT: f,seed: g};});
    var Moji = F5(function (a,b,c,d,e) {    return {x: a,y: b,dir: c,$char: d,scolor: e};});
    var Right = {ctor: "Right"};
    var Left = {ctor: "Left"};
@@ -7109,22 +7121,22 @@ Elm.Main.make = function (_elm) {
    var Up = {ctor: "Up"};
    var getDir = function (i) {    return _U.eq(i,0) ? Up : _U.eq(i,1) ? Down : _U.eq(i,2) ? Left : Right;};
    var makeVDir = F3(function (x,d,c) {    return _U.eq(c,0) ? _U.eq(x,0) ? Left : _U.eq(x,1) ? Down : Right : getDir(d);});
-   var getArrow = function (_p5) {
-      var _p6 = _p5;
-      var _p8 = _p6.y;
-      var _p7 = _p6.x;
-      return _U.eq(_p7,0) && _U.eq(_p8,1) ? $Maybe.Just(Up) : _U.eq(_p7,0) && _U.eq(_p8,-1) ? $Maybe.Just(Down) : _U.eq(_p7,-1) && _U.eq(_p8,
-      0) ? $Maybe.Just(Left) : _U.eq(_p7,1) && _U.eq(_p8,0) ? $Maybe.Just(Right) : $Maybe.Nothing;
+   var getArrow = function (_p11) {
+      var _p12 = _p11;
+      var _p14 = _p12.y;
+      var _p13 = _p12.x;
+      return _U.eq(_p13,0) && _U.eq(_p14,1) ? $Maybe.Just(Up) : _U.eq(_p13,0) && _U.eq(_p14,-1) ? $Maybe.Just(Down) : _U.eq(_p13,-1) && _U.eq(_p14,
+      0) ? $Maybe.Just(Left) : _U.eq(_p13,1) && _U.eq(_p14,0) ? $Maybe.Just(Right) : $Maybe.Nothing;
    };
    var dropMojis = F3(function (arw,c,mojis) {
       var dir = getArrow(arw);
-      var _p9 = mojis;
-      if (_p9.ctor === "[]") {
+      var _p15 = mojis;
+      if (_p15.ctor === "[]") {
             return {ctor: "_Tuple2",_0: c,_1: _U.list([])};
          } else {
-            var _p10 = dir;
-            if (_p10.ctor === "Just") {
-                  return _U.eq(_p10._0,_p9._0.dir) ? {ctor: "_Tuple2",_0: c + 1,_1: _p9._1} : {ctor: "_Tuple2",_0: c,_1: mojis};
+            var _p16 = dir;
+            if (_p16.ctor === "Just") {
+                  return _U.eq(_p16._0,_p15._0.dir) ? {ctor: "_Tuple2",_0: c + 1,_1: _p15._1} : {ctor: "_Tuple2",_0: c,_1: mojis};
                } else {
                   return {ctor: "_Tuple2",_0: c,_1: mojis};
                }
@@ -7132,26 +7144,26 @@ Elm.Main.make = function (_elm) {
    });
    var End = {ctor: "End"};
    var Pause = {ctor: "Pause"};
-   var initialGame = A6(Game,Pause,_U.list([]),1,0,0,$Random.initialSeed(123456));
+   var initialGame = A7(Game,Pause,{x: 0,y: 0},_U.list([]),1,0,0,$Random.initialSeed(123456));
    var Play = {ctor: "Play"};
    var size = 70;
    var colorLine = A3($Color.rgb,0,0,0);
    var colorbg = A3($Color.rgb,192,192,192);
-   var _p11 = {ctor: "_Tuple2",_0: A3($Color.rgb,255,0,0),_1: A3($Color.rgb,0,0,0)};
-   var color1 = _p11._0;
-   var color2 = _p11._1;
+   var _p17 = {ctor: "_Tuple2",_0: A3($Color.rgb,255,0,0),_1: A3($Color.rgb,0,0,0)};
+   var color1 = _p17._0;
+   var color2 = _p17._1;
    var getMojiColor = function (i) {    return _U.eq(i,0) ? color1 : color2;};
-   var _p12 = {ctor: "_Tuple2",_0: -50,_1: 50};
-   var sep1 = _p12._0;
-   var sep2 = _p12._1;
-   var _p13 = {ctor: "_Tuple3",_0: -100,_1: 0,_2: 100};
-   var ln1 = _p13._0;
-   var ln2 = _p13._1;
-   var ln3 = _p13._2;
+   var _p18 = {ctor: "_Tuple2",_0: -50,_1: 50};
+   var sep1 = _p18._0;
+   var sep2 = _p18._1;
+   var _p19 = {ctor: "_Tuple3",_0: -100,_1: 0,_2: 100};
+   var ln1 = _p19._0;
+   var ln2 = _p19._1;
+   var ln3 = _p19._2;
    var getLineX = function (i) {    return _U.eq(i,0) ? ln1 : _U.eq(i,1) ? ln2 : ln3;};
-   var _p14 = {ctor: "_Tuple2",_0: 150,_1: 200};
-   var halfWidth = _p14._0;
-   var halfHeight = _p14._1;
+   var _p20 = {ctor: "_Tuple2",_0: 150,_1: 200};
+   var halfWidth = _p20._0;
+   var halfHeight = _p20._1;
    var newMoji = F3(function (x,d,c) {
       var vdir = A3(makeVDir,x,d,c);
       var mcolor = getMojiColor(c);
@@ -7161,48 +7173,52 @@ Elm.Main.make = function (_elm) {
    });
    var addMojis = F4(function (sd,dt,tm,mojis) {
       var dist = tm * dt;
-      var _p15 = A2($Random.generate,A2($Random.$int,0,2),sd);
-      var line = _p15._0;
-      var sd1 = _p15._1;
-      var _p16 = A2($Random.generate,A2($Random.$int,0,3),sd1);
-      var $char = _p16._0;
-      var sd2 = _p16._1;
-      var _p17 = A2($Random.generate,A2($Random.$int,0,1),sd2);
-      var lcolor = _p17._0;
-      var newSeed = _p17._1;
+      var _p21 = A2($Random.generate,A2($Random.$int,0,2),sd);
+      var line = _p21._0;
+      var sd1 = _p21._1;
+      var _p22 = A2($Random.generate,A2($Random.$int,0,3),sd1);
+      var $char = _p22._0;
+      var sd2 = _p22._1;
+      var _p23 = A2($Random.generate,A2($Random.$int,0,1),sd2);
+      var lcolor = _p23._0;
+      var newSeed = _p23._1;
       return _U.cmp(dist,size) > 0 ? {ctor: "_Tuple3",_0: newSeed,_1: 0,_2: A2($List.append,mojis,_U.list([A3(newMoji,line,$char,lcolor)]))} : {ctor: "_Tuple3"
                                                                                                                                                ,_0: newSeed
                                                                                                                                                ,_1: tm
                                                                                                                                                ,_2: mojis};
    });
-   var isPass = function (_p18) {    var _p19 = _p18;return _U.cmp(_p19.y,0 - halfHeight) < 0 ? true : false;};
-   var _p20 = {ctor: "_Tuple2",_0: 300,_1: 400};
-   var width = _p20._0;
-   var height = _p20._1;
-   var update = F2(function (_p22,_p21) {
-      var _p23 = _p22;
-      var _p32 = _p23.space;
-      var _p31 = _p23.delta;
-      var _p24 = _p21;
-      var _p30 = _p24.state;
-      var _p29 = _p24.mojis;
-      var _p28 = _p24.count;
-      var _p27 = _p24.addT;
-      var newLevel = $Basics.round($Basics.toFloat(_p28) / 30 + 1);
-      var _p25 = _U.eq(_p30,Play) ? A3(dropMojis,_p23.dir,_p28,_p29) : {ctor: "_Tuple2",_0: _p28,_1: _p29};
-      var newCount = _p25._0;
-      var dropedMojis = _p25._1;
-      var newState = _p32 && _U.eq(_p30,Pause) ? Play : _p32 && _U.eq(_p30,End) ? Pause : A2($List.any,isPass,_p29) ? End : _p30;
-      var seedt = _U.eq(_p30,Pause) ? _p23.iseed : _p24.seed;
-      var dt = width / calcPassTime(_p24.level);
-      var tm = _p31 + _p27;
-      var _p26 = _U.eq(_p30,Play) ? A4(addMojis,seedt,dt,tm,dropedMojis) : {ctor: "_Tuple3",_0: seedt,_1: _p27,_2: dropedMojis};
-      var newSeed = _p26._0;
-      var newAddT = _p26._1;
-      var addedMojis = _p26._2;
-      var newMojis = _U.eq(_p30,Play) ? A3(updateMojis,_p31,dt,addedMojis) : addedMojis;
-      return _U.eq(newState,Pause) ? initialGame : _U.update(_p24,
-      {state: newState,mojis: newMojis,level: newLevel,count: newCount,addT: newAddT,seed: newSeed});
+   var isPass = function (_p24) {    var _p25 = _p24;return _U.cmp(_p25.y,0 - halfHeight) < 0 ? true : false;};
+   var _p26 = {ctor: "_Tuple2",_0: 300,_1: 400};
+   var width = _p26._0;
+   var height = _p26._1;
+   var update = F2(function (_p28,_p27) {
+      var _p29 = _p28;
+      var _p40 = _p29.space;
+      var _p39 = _p29.dir;
+      var _p38 = _p29.delta;
+      var _p30 = _p27;
+      var _p37 = _p30.state;
+      var _p36 = _p30.prvDir;
+      var _p35 = _p30.mojis;
+      var _p34 = _p30.count;
+      var _p33 = _p30.addT;
+      var newLevel = $Basics.round($Basics.toFloat(_p34) / 30 + 1);
+      var _p31 = _U.eq(_p37,Play) && $Basics.not(_U.eq(_p39.x,_p36.x) && _U.eq(_p39.y,_p36.y)) ? A3(dropMojis,_p39,_p34,_p35) : {ctor: "_Tuple2"
+                                                                                                                                ,_0: _p34
+                                                                                                                                ,_1: _p35};
+      var newCount = _p31._0;
+      var dropedMojis = _p31._1;
+      var newState = _p40 && _U.eq(_p37,Pause) ? Play : _p40 && _U.eq(_p37,End) ? Pause : A2($List.any,isPass,_p35) ? End : _p37;
+      var seedt = _U.eq(_p37,Pause) ? _p29.iseed : _p30.seed;
+      var dt = width / calcPassTime(_p30.level);
+      var tm = _p38 + _p33;
+      var _p32 = _U.eq(_p37,Play) ? A4(addMojis,seedt,dt,tm,dropedMojis) : {ctor: "_Tuple3",_0: seedt,_1: _p33,_2: dropedMojis};
+      var newSeed = _p32._0;
+      var newAddT = _p32._1;
+      var addedMojis = _p32._2;
+      var newMojis = _U.eq(_p37,Play) ? A3(updateMojis,_p38,dt,addedMojis) : addedMojis;
+      return _U.eq(newState,Pause) ? initialGame : _U.update(_p30,
+      {state: newState,prvDir: _p39,mojis: newMojis,level: newLevel,count: newCount,addT: newAddT,seed: newSeed});
    });
    var game = A3($Signal.foldp,update,initialGame,input);
    var view = function (game) {
@@ -7265,5 +7281,6 @@ Elm.Main.make = function (_elm) {
                              ,game: game
                              ,initialGame: initialGame
                              ,delta: delta
-                             ,input: input};
+                             ,input: input
+                             ,arrowsPulse: arrowsPulse};
 };</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script></body></html>

@@ -32,6 +32,7 @@ type alias Moji =
 
 type alias Game =
   { state: GameState
+  , prvDir: {x : Int, y : Int}
   , mojis: List Moji
   , level: Int
   , count: Int
@@ -106,7 +107,7 @@ makeVDir x d c =
 
 -- update
 update : Input -> Game -> Game
-update {space, dir, iseed, delta} ({state, mojis, level, count, addT, seed} as game) =
+update {space, dir, iseed, delta} ({state, prvDir, mojis, level, count, addT, seed} as game) =
   let
     tm = delta + addT
     dt = width / (calcPassTime level)
@@ -122,7 +123,7 @@ update {space, dir, iseed, delta} ({state, mojis, level, count, addT, seed} as g
       else
         state
     (newCount, dropedMojis) =
-      if state == Play then
+      if state == Play && not (dir.x == prvDir.x && dir.y == prvDir.y) then
         dropMojis dir count mojis
       else
         (count, mojis)
@@ -143,6 +144,7 @@ update {space, dir, iseed, delta} ({state, mojis, level, count, addT, seed} as g
     else
       { game |
           state = newState,
+          prvDir = dir,
           mojis = newMojis,
           level = newLevel,
           count = newCount,
@@ -223,7 +225,7 @@ main = Signal.map view game
 game : Signal Game
 game = Signal.foldp update initialGame input
 
-initialGame = Game Pause [] 1 0 0 (Random.initialSeed 123456)
+initialGame = Game Pause {x = 0, y = 0} [] 1 0 0 (Random.initialSeed 123456)
 
 delta = Signal.map Time.inMilliseconds <| Time.fps 30
 
@@ -235,3 +237,14 @@ input =
       Keyboard.arrows
       initialSeed
       delta
+
+arrowsPulse : Signal { c : Bool, x : Int, y : Int }
+arrowsPulse = 
+  let 
+    upd ({x, y} as n) ({c, x, y} as p) =
+      if p.x == n.x && p.y == n.y then
+        log "false" { c = False, x = n.x, y = n.y }
+      else
+        log "true" { c = True, x = n.x, y = n.y }
+  in
+    Signal.foldp upd {c = False, x = 0, y = 0} <| Signal.sampleOn delta Keyboard.arrows
